@@ -1,0 +1,36 @@
+#!/bin/sh
+
+udevd &
+udevadm trigger
+
+fbcp &
+
+# Writable directories. See documentation here:
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+export HOME=/tmp/balena
+mkdir -p /tmp/balena/xdg_runtime
+chmod 0700 /tmp/balena/xdg_runtime
+export XDG_RUNTIME_DIR=/tmp/balena/xdg_runtime
+
+# disable touch screen
+export WPE_BCMRPI_TOUCH=0
+
+# mount the token folder, if we're on balena
+if [ "$BALENA" == "1" ]; then
+  mkdir -p /mnt/data
+  mount /dev/mmcblk0p6 /mnt/data
+fi
+
+# read the refresh token file
+if [[ $REFRESH_TOKEN_FILE ]]; then
+  if [[ -f "$REFRESH_TOKEN_FILE" ]]; then
+    export REFRESH_TOKEN=`cat $REFRESH_TOKEN_FILE`
+  fi
+fi
+
+if [[ $REFRESH_TOKEN ]]; then
+    export WPE_URL="$WPE_URL?token=$REFRESH_TOKEN"
+fi
+
+# Start browser
+cog "file:///var/lib/public_html/index.html?url=${WPE_URL}"
