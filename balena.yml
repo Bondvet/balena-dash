@@ -1,0 +1,8 @@
+name: balena-dash
+type: sw.block
+version: 1.0.0
+data:
+  defaultDeviceType: raspberrypi3
+  supportedDeviceTypes:
+    - raspberrypi3
+
